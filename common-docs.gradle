@@ -10,7 +10,6 @@ buildscript {
 
 apply plugin: 'java-library'
 apply plugin: 'groovy'
-apply plugin: "org.asciidoctor.jvm.convert"
 
 def DOCUMENTATION_GROUP = 'Documentation'
 
@@ -48,6 +47,7 @@ dependencies {
         documentation "jline:jline:2.14.6"
         documentation "com.github.javaparser:javaparser-core:3.15.14"
         documentation "org.codehaus.groovy:groovy:${groovyVersion}"
+        documentation "org.codehaus.groovy:groovy-templates:${groovyVersion}"
         documentation "org.codehaus.groovy:groovy-ant:$groovyVersion"
         documentation "org.codehaus.groovy:groovy-cli-picocli:$groovyVersion"
     }
@@ -55,8 +55,10 @@ dependencies {
 
 subprojects {
 
+    apply plugin: "org.asciidoctor.jvm.convert"
+
     configurations {
-        documentation
+        documentation.extendsFrom compileClasspath
     }
 
     dependencies {
@@ -65,6 +67,7 @@ subprojects {
             documentation "jline:jline:2.14.6"
             documentation "com.github.javaparser:javaparser-core:3.15.14"
             documentation "org.codehaus.groovy:groovy:${groovyVersion}"
+            documentation "org.codehaus.groovy:groovy-templates:${groovyVersion}"
             documentation "org.codehaus.groovy:groovy-ant:$groovyVersion"
             documentation "org.codehaus.groovy:groovy-dateutil:$groovyVersion"
             documentation "org.codehaus.groovy:groovy-cli-picocli:$groovyVersion"
