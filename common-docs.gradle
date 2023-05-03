@@ -3,12 +3,14 @@ buildscript {
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
+        classpath("org.asciidoctor:asciidoctor-gradle-jvm:4.0.0-alpha.1")
         classpath "org.grails:grails-docs:${project.ext.properties.grailsDocsVersion ?: grailsVersion}"
     }
 }
 
 apply plugin: 'java-library'
 apply plugin: 'groovy'
+apply plugin: "org.asciidoctor.jvm.convert"
 
 def DOCUMENTATION_GROUP = 'Documentation'
 
@@ -103,6 +105,16 @@ tasks.withType(Groovydoc) {
     classpath += configurations.documentation
 }
 
+tasks.withType(org.gradle.api.tasks.javadoc.Groovydoc) {
+    configure {
+        access = GroovydocAccess.PRIVATE
+        processScripts = false
+        includeMainForScripts = false
+        includeAuthor = true
+        groovyClasspath = configurations.documentation
+    }
+}
+
 task publishGuide(type: grails.doc.gradle.PublishGuide) {
     group = DOCUMENTATION_GROUP
     description = 'Generate Guide'
@@ -151,8 +163,8 @@ task docs(dependsOn:[groovydoc, publishGuide]) {
 def assembleTask = project.tasks.findByName("assemble")
 if(assembleTask == null) {
     task assemble(dependsOn: docs, type:Zip) {
-        baseName = "${project.name}-${project.version}"
-        destinationDir = new File(project.buildDir, "distributions")
+        archiveFileName = "${project.name}-${project.version}.zip"
+        destinationDirectory = new File(project.buildDir, "distributions")
         from project.files("${buildDir}/docs")
     }
 }
