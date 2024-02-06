@@ -1,30 +1,32 @@
 apply plugin:'groovy'
 apply plugin: 'java-library'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility=1.17
+targetCompatibility=1.17
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
 
 configurations {
-    documentation
+    documentation.extendsFrom compileClasspath
 }
 
 configurations {
     all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details -> 
             String group = details.requested.group
-            if(group == 'org.codehaus.groovy') {
-                 details.useVersion(groovyVersion)
-            } 
+            if (details.requested.group == "org.codehaus.groovy") {
+                details.useTarget(group: "org.apache.groovy", name: details.requested.name, version: details.requested.version)
+                details.because "The dependency coordinates are changed in Apache Groovy 4"
+            }
         }
     }
 }
 
 dependencies {
-    api "org.codehaus.groovy:groovy:$groovyVersion"
+    api platform("org.apache.groovy:groovy-bom:$groovyVersion")
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.slf4j:slf4j-api:$slf4jVersion"
 
     testImplementation "org.spockframework:spock-core:${spockVersion}", {
@@ -37,10 +39,28 @@ dependencies {
 
 }
 
+tasks.named("compileTestGroovy") {
+    options.forkOptions.jvmArgs += ["-Dspock.iKnowWhatImDoing.disableGroovyVersionCheck=true"]
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'spock.iKnowWhatImDoing.disableGroovyVersionCheck', 'true'
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+    if (isCiBuild) {
+        maxParallelForks = 2
+    } else {
+        maxParallelForks = 4
+    }
+}
+
 test {
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
     }
 }
 
-groovydoc.classpath += (configurations.documentation + configurations.compileClasspath)
+groovydoc.classpath += configurations.documentation
