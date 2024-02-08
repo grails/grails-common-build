@@ -1,8 +1,10 @@
 apply plugin:'groovy'
 apply plugin: 'java-library'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+java {
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
+}
 
 repositories {
     maven { url "https://repo.grails.org/grails/core" }
