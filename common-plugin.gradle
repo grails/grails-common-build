@@ -2,8 +2,10 @@ apply plugin: 'java-library'
 apply plugin: 'groovy'
 apply plugin: "org.grails.grails-plugin"
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+java {
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
+}
 
 project.tasks.findMainClass.onlyIf { false }
 
